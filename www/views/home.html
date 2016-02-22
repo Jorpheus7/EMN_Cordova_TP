@@ -1,0 +1,19 @@
+<ons-navigator var="app.navi">
+  <ons-page id="homePage">
+      <ons-toolbar>
+          <div class="left">
+              <ons-toolbar-button onclick="app.menu.toggleMenu()"><ons-icon icon="fa-bars"></ons-icon></ons-toolbar-button>
+          </div>
+          <div class="center">Accueil</div>
+      </ons-toolbar>
+
+
+      <h1 class="text-center">Application Conference</h1>
+      <img class="img-center" src="img/logo.png" /><br />
+
+      <button onclick="app.menu.setMainPage('views/sessions.html', {closeMenu: true})" class="button button--large">Voir les sessions</button> <br />
+      <button onclick="app.menu.setMainPage('views/speakers.html', {closeMenu: true})" class="button button--large">Voir les présentateurs</button>
+
+
+  </ons-page>
+</ons-navigator>

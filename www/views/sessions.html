@@ -1,0 +1,12 @@
+<ons-navigator var="app.navi">
+    <ons-page id="sessionsPage" oninit="initSession();"> 
+        <ons-toolbar>
+            <div class="left">
+                <ons-toolbar-button ng-click="app.menu.toggleMenu()"><ons-icon icon="fa-bars"></ons-icon></ons-toolbar-button>
+            </div>
+            <div class="center">Sessions</div>
+        </ons-toolbar>    
+       <ul id="sessionList" class="list list_sessions">
+       </ul>
+    </ons-page>
+</ons-navigator>
