@@ -114,3 +114,13 @@
     margin-left: 10px;
     margin-bottom: 10px;
 }
+
+#sessionItemTitle {
+    margin-top: 40px;
+}
+
+#favorite {
+    position: absolute;
+    right: 0px;
+    top: 5px;
+}

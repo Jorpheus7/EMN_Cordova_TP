@@ -26,7 +26,7 @@ $(document).on('pageinit', "#sessionsPage", function() {
             $("#sessionList").append("<li class='list__header'>" + data.categories[category] + "</li>");
             data.sessions.forEach(function(session) {
                 if (session.type === category) {  
-                    $("#sessionList").append("<li class='list__item list__item--chevron' id='session_" + session.id + "'>" + session.title + "</li>");
+                    $("#sessionList").append("<ons-list-item class='list__item list__item--chevron' id='session_" + session.id + "'>" + session.title + "</ons-list-item>");
                     $("#session_" + session.id).on('click', function(event) {
                       app.navi.pushPage('views/session.html', {session : session});
                   	});
@@ -37,7 +37,21 @@ $(document).on('pageinit', "#sessionsPage", function() {
 });
 
 $(document).on('pageinit', "#sessionItemPage", function() {
-	var session = app.navi.getCurrentPage().options.session;
+    var session = app.navi.getCurrentPage().options.session;
+    if(window.sqlitePlugin != undefined){
+        db = window.sqlitePlugin.openDatabase({name: "my.db"});
+        db.transaction(function(tx) {
+            tx.executeSql('CREATE TABLE IF NOT EXISTS NOTES (id integer primary key, comment text DEFAULT "", sessionId text, fav text DEFAULT "false")');
+            tx.executeSql('SELECT fav FROM NOTES WHERE sessionId = ? ;', [session.id], function(tx, res) {
+                console.log(res.rows.item(0));
+                if (res.rows.item(0) && res.rows.item(0).fav == "true") {
+                    $("#favorite").append('<ons-icon icon="fa-star" size="30px" class="ons-icon fa-star fa" style="font-size: 30px;" onclick=\'unfav("' + session.id + '")\'></ons-icon>');
+                }else{
+                    $("#favorite").append('<ons-icon icon="fa-star-o" size="30px" class="ons-icon fa-star-o fa" style="font-size: 30px;" onclick=\'fav("' + session.id + '")\'></ons-icon>');
+                }
+            });
+        });
+    }
 	$("#sessionItemTitle").append(session.title);
 	$("#sessionItemConfRoom").append("Salle : " + session.confRoom);
 	$("#sessionItemSpeaker").append("@" + session.speakers);
@@ -47,12 +61,51 @@ $(document).on('pageinit', "#sessionItemPage", function() {
     });
 });
 
+function fav(sessionId){
+    $("#favorite").empty();
+    $("#favorite").append('<ons-icon icon="fa-star" size="30px" class="ons-icon fa-star fa" style="font-size: 30px;" onclick=\'unfav("' + sessionId + '")\'></ons-icon>');
+    saveFav(sessionId, "true");
+}
+
+function unfav(sessionId){
+    $("#favorite").empty();
+    $("#favorite").append('<ons-icon icon="fa-star-o" size="30px" class="ons-icon fa-star-o fa" style="font-size: 30px;" onclick=\'fav("' + sessionId + '")\'></ons-icon>');
+    saveFav(sessionId, "false");
+}
+
+function saveFav(sessionId, fav){
+    db.transaction(function(tx) {
+        var todo = "INSERT";
+        tx.executeSql('SELECT * FROM NOTES WHERE sessionId=? ;', [sessionId], function(tx, res) {
+            if (res.rows.item(0)) {
+                todo = "UPDATE";
+            }
+            if (todo == "INSERT") {
+                tx.executeSql('INSERT INTO NOTES (fav, sessionId) VALUES (?,?)', [fav, sessionId], function(tx, res) {
+                    tx.executeSql('SELECT * FROM NOTES WHERE sessionId=? ;', [sessionId], function(tx, res) {
+                        console.log(res.rows.item(0));
+                    });
+                });
+            } else if (todo == "UPDATE") {
+                tx.executeSql('UPDATE NOTES SET fav=? WHERE sessionId=?', [fav, sessionId], function(tx, res) {
+                    tx.executeSql('SELECT * FROM NOTES WHERE sessionId=? ;', [sessionId], function(tx, res) {
+                        console.log(res.rows.item(0));
+                    });
+                });
+            }
+        });
+    }, function(error) {
+        console.log('transaction error: ' + error.message);
+    }, function() {
+        console.log('transaction ok');
+    });
+}
+
 $(document).on('pageinit', "#sessionItemNotesPage", function() {
     var session = app.navi.getCurrentPage().options.session;
     $("#sessionItemTitleNotesPage").append(session.title);    
     db = window.sqlitePlugin.openDatabase({name: "my.db"});
     db.transaction(function(tx) {
-        tx.executeSql('CREATE TABLE IF NOT EXISTS NOTES (id integer primary key, comment text, sessionId text)');
         tx.executeSql('SELECT * FROM NOTES WHERE sessionId = ? ;', [session.id], function(tx, res) {
             if (res.rows.item(0)) {
                 $('textarea#sessionMesNotesTextArea').val(res.rows.item(0).comment);
@@ -101,7 +154,7 @@ $(document).on('pageinit', "#sessionItemNotesPage", function() {
     
     function imageLoaded(imageData) { 
         $("#images").append('<img src="data:image/jpeg;base64,' + imageData + '" width="80%"/>');
-        // TODO save image
+        // Saving image
         db.transaction(function(tx) {
             tx.executeSql('INSERT INTO IMAGES (sessionId, encodedDataURL) VALUES (?,?)', [session.id, imageData], function(tx, res) {
                 tx.executeSql('SELECT * FROM IMAGES WHERE sessionId=? ;', [session.id], function(tx, res) {

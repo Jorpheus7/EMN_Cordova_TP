@@ -16,17 +16,17 @@ The following functionalities have been implemented :
 * Presenters page completed with the data extracted from JSon
 * Session and Presenter detail page
 * Technics page with all the device information
-* "Add to contact" button in presenter page
+* "Add to contact" switch in presenter page
 * SQLite database used to store custom info
 * Ability to take notes about the sessions, the notes are stored in the database
 * Import picture from the device gallery and store it in the database
 * Take picture using the camera and store it in the database
 * Custom icon for app
+* Ability to flag some sessions as favorites (data stored in the database)
 
 The following functionalities remain to do :
 * Audio and Video capture
 * Social Sharing
 * In app browser
 * Display an agenda
-* Ability to flag some sessions as favorites
 * Ability to rate a session
